@@ -41,7 +41,7 @@ to the named channel via a `PRIVMSG` command.
 
 * `message`: The text of the message to be sent.
 
-Any Concourse [metadata][] in the status will be evaluated prior to
+Any Concourse [metadata][] in the `message` will be evaluated prior to
 sending the tweet.
 
 Note also that the pseudo-metadata `BUILD_URL` will expand to:
