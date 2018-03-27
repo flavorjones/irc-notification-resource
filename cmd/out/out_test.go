@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"bytes"
+	"os"
 
 	. "github.com/flavorjones/irc-notification-resource/cmd/out"
 
@@ -94,6 +95,42 @@ var _ = Describe("Out", func() {
 				_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}}`))
 				Expect(error.Error()).To(MatchRegexp(`No message was provided`))
 			})
+		})
+	})
+
+	Describe("metadata expansion", func() {
+		var request Request
+
+		BeforeEach(func() {
+			request = Request{
+				Source: Source{
+					Server:   "chat.freenode.net",
+					Port:     7070,
+					Channel:  "#random",
+					User:     "randobot1337",
+					Password: "secretsecret",
+				},
+				Params: Params{DryRun: true},
+			}
+
+			os.Setenv("BUILD_ID", "id-123")
+			os.Setenv("BUILD_NAME", "name-asdf")
+			os.Setenv("BUILD_JOB_NAME", "job-name-asdf")
+			os.Setenv("BUILD_PIPELINE_NAME", "pipeline-name-asdf")
+			os.Setenv("BUILD_TEAM_NAME", "team-name-asdf")
+			os.Setenv("ATC_EXTERNAL_URL", "https://ci.example.com")
+		})
+
+		It("expands environment variables", func() {
+			request.Params.Message = ">> $BUILD_ID <<"
+			message := ExpandMessage(&request)
+			Expect(message).To(Equal(">> id-123 <<"))
+		})
+
+		It("expands BUILD_URL pseudo-metadata", func() {
+			request.Params.Message = ">> $BUILD_URL <<"
+			message := ExpandMessage(&request)
+			Expect(message).To(Equal(">> https://ci.example.com/teams/team-name-asdf/pipelines/pipeline-name-asdf/jobs/job-name-asdf/builds/name-asdf <<"))
 		})
 	})
 })

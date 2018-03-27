@@ -85,11 +85,12 @@ func ParseAndCheckRequest(reader io.Reader) (*Request, error) {
 	return &request, nil
 }
 
-func connString(request *Request) string {
-	return fmt.Sprintf("%s:%d", request.Source.Server, request.Source.Port)
+func ExpandMessage(request *Request) string {
+	os.Setenv("BUILD_URL", os.ExpandEnv(buildUrlTemplate))
+	return os.ExpandEnv(request.Params.Message)
 }
 
-func buildResponse(request *Request, message string) *Response {
+func BuildResponse(request *Request, message string) *Response {
 	// omit password for reasons that are hopefully obvious
 	response := Response{}
 	response.Metadata = append(response.Metadata, Metadatum{"host", connString(request)})
@@ -100,38 +101,47 @@ func buildResponse(request *Request, message string) *Response {
 	return &response
 }
 
+func SendMessage(request *Request, message string) error {
+	conn := irc.New(request.Source.User, request.Source.User)
+
+	conn.UseTLS = true
+	conn.Log = log.New(ioutil.Discard, "", 0) // be completely silent
+	conn.Password = request.Source.Password
+
+	conn.AddCallback("001", func(*irc.Event) {
+		conn.Privmsg(request.Source.Channel, message)
+		conn.Quit()
+	})
+
+	err := conn.Connect(connString(request))
+	if err != nil {
+		return err
+	}
+
+	conn.Loop()
+
+	return nil
+}
+
+func connString(request *Request) string {
+	return fmt.Sprintf("%s:%d", request.Source.Server, request.Source.Port)
+}
+
 func main() {
 	request, err := ParseAndCheckRequest(os.Stdin)
 	if err != nil {
 		exitWithError(err)
 	}
 
-	os.Setenv("BUILD_URL", os.ExpandEnv(buildUrlTemplate))
-	message := os.ExpandEnv(request.Params.Message)
+	message := ExpandMessage(request)
 
 	if request.Params.DryRun {
 		fmt.Fprintf(os.Stderr, "NOTICE: dry run: not sending: `%s`\n", message)
 	} else {
-		conn := irc.New(request.Source.User, request.Source.User)
-
-		conn.UseTLS = true
-		conn.Log = log.New(ioutil.Discard, "", 0) // be completely silent
-		conn.Password = request.Source.Password
-
-		conn.AddCallback("001", func(*irc.Event) {
-			conn.Privmsg(request.Source.Channel, message)
-			conn.Quit()
-		})
-
-		err = conn.Connect(connString(request))
-		if err != nil {
-			exitWithError(err)
-		}
-
-		conn.Loop()
+		SendMessage(request, message)
 	}
 
-	response := buildResponse(request, message)
+	response := BuildResponse(request, message)
 
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
