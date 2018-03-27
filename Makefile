@@ -1,13 +1,17 @@
 ARTIFACTS_DIR=artifacts
 
-default: artifacts
+default: test
 
-all: artifacts docker
+all: test docker
+
+test: artifacts integration_test.sh
+	cd cmd/out && go test
+	./integration_test.sh
 
 artifacts: $(ARTIFACTS_DIR)/check $(ARTIFACTS_DIR)/in $(ARTIFACTS_DIR)/out
 
 $(ARTIFACTS_DIR)/%: cmd/%
-	go get -d ./cmd/$(shell basename $@)
+	go get -d -t ./cmd/$(shell basename $@)
 	go build -o $@ ./cmd/$(shell basename $@)
 
 docker: Dockerfile
