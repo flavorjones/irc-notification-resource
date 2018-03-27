@@ -4,11 +4,11 @@ default: artifacts
 
 all: artifacts docker
 
-artifacts: check in out
+artifacts: $(ARTIFACTS_DIR)/check $(ARTIFACTS_DIR)/in $(ARTIFACTS_DIR)/out
 
-%: cmd/%
-	go get -d ./cmd/$@
-	go build -o $(ARTIFACTS_DIR)/$@ ./cmd/$@
+$(ARTIFACTS_DIR)/%: cmd/%
+	go get -d ./cmd/$(shell basename $@)
+	go build -o $@ ./cmd/$(shell basename $@)
 
 docker: Dockerfile
 	docker build -t irc-notifications-resource .
