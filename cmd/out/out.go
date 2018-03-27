@@ -136,9 +136,7 @@ func main() {
 
 	message := ExpandMessage(request)
 
-	if request.Params.DryRun {
-		fmt.Fprintf(os.Stderr, "NOTICE: dry run: not sending: `%s`\n", message)
-	} else {
+	if !request.Params.DryRun {
 		SendMessage(request, message)
 	}
 
