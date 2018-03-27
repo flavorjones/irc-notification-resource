@@ -1,17 +1,24 @@
 ARTIFACTS_DIR=artifacts
 
-default: artifacts
+default: test
 
-all: artifacts docker
+all: test docker
 
-artifacts: check in out
+test: artifacts integration_test.sh
+	cd cmd/out && go test
+	./integration_test.sh
 
-%: cmd/%
-	go get -d ./cmd/$@
-	go build -o $(ARTIFACTS_DIR)/$@ ./cmd/$@
+artifacts: $(ARTIFACTS_DIR)/check $(ARTIFACTS_DIR)/in $(ARTIFACTS_DIR)/out
+
+$(ARTIFACTS_DIR)/%: cmd/%
+	go get -d -t ./cmd/$(shell basename $@)
+	go build -o $@ ./cmd/$(shell basename $@)
 
 docker: Dockerfile
-	docker build -t irc-notifications-resource .
+	docker build -t flavorjones/irc-notifications-resource .
+
+docker-push: docker
+	docker push flavorjones/irc-notifications-resource
 
 clean:
 	rm -rf $(ARTIFACTS_DIR)
