@@ -133,4 +133,53 @@ var _ = Describe("Out", func() {
 			Expect(message).To(Equal(">> https://ci.example.com/teams/team-name-asdf/pipelines/pipeline-name-asdf/jobs/job-name-asdf/builds/name-asdf <<"))
 		})
 	})
+
+	Describe("response", func() {
+		var request Request
+		var message string
+
+		BeforeEach(func() {
+			request = Request{
+				Source: Source{
+					Server:   "chat.freenode.net",
+					Port:     7070,
+					Channel:  "#random",
+					User:     "randobot1337",
+					Password: "secretsecret",
+				},
+				Params: Params{DryRun: true},
+			}
+
+			os.Setenv("BUILD_ID", "id-123")
+			os.Setenv("BUILD_NAME", "name-asdf")
+			os.Setenv("BUILD_JOB_NAME", "job-name-asdf")
+			os.Setenv("BUILD_PIPELINE_NAME", "pipeline-name-asdf")
+			os.Setenv("BUILD_TEAM_NAME", "team-name-asdf")
+			os.Setenv("ATC_EXTERNAL_URL", "https://ci.example.com")
+
+			message = "this is a message"
+		})
+
+		It("contains version", func() {
+			response := BuildResponse(&request, message)
+			Expect(response.Version.Ref).To(Equal("none"))
+		})
+
+		It("contains specific metadata", func() {
+			response := BuildResponse(&request, message)
+			Expect(response.Metadata).To(Equal([]Metadatum{
+				Metadatum{"host", "chat.freenode.net:7070"},
+				Metadatum{"channel", "#random"},
+				Metadatum{"user", "randobot1337"},
+				Metadatum{"message", "this is a message"},
+			}))
+		})
+
+		It("does not contains metadata `password`", func() {
+			response := BuildResponse(&request, message)
+			for _, metadatum := range response.Metadata {
+				Expect(metadatum.Name).To(Not(MatchRegexp(`password`)))
+			}
+		})
+	})
 })
