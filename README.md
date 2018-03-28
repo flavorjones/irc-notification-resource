@@ -85,6 +85,21 @@ jobs:
 Pull requests are welcome, as are Github issues opened to discuss bugs or desired features.
 
 
+### Running the tests
+
+Requires `go` and `make` to be installed.
+
+``` sh
+make test
+```
+
+Or using the `Dockerfile`, which runs the tests as part of the image build:
+
+```
+make docker
+```
+
+
 ## License
 
 Distributed under the MIT license, see the `LICENSE` file.
