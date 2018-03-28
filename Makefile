@@ -15,10 +15,10 @@ $(ARTIFACTS_DIR)/%: cmd/%
 	go build -o $@ ./cmd/$(shell basename $@)
 
 docker: Dockerfile
-	docker build -t flavorjones/irc-notifications-resource .
+	docker build -t flavorjones/irc-notification-resource .
 
 docker-push: docker
-	docker push flavorjones/irc-notifications-resource
+	docker push flavorjones/irc-notification-resource
 
 clean:
 	rm -rf $(ARTIFACTS_DIR)
