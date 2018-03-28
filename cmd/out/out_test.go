@@ -172,7 +172,7 @@ var _ = Describe("Out", func() {
 				Metadatum{"channel", "#random"},
 				Metadatum{"user", "randobot1337"},
 				Metadatum{"message", "this is a message"},
-				Metadatum{"dry_run", true},
+				Metadatum{"dry_run", "true"},
 			}))
 		})
 

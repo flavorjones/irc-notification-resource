@@ -47,7 +47,7 @@ cat > $tempdir/expected.json <<EOF
     },
     {
       "name": "dry_run",
-      "value": true
+      "value": "true"
     }
   ]
 }

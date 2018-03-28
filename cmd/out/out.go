@@ -97,7 +97,7 @@ func BuildResponse(request *Request, message string) *Response {
 	response.Metadata = append(response.Metadata, Metadatum{"channel", request.Source.Channel})
 	response.Metadata = append(response.Metadata, Metadatum{"user", request.Source.User})
 	response.Metadata = append(response.Metadata, Metadatum{"message", message})
-	response.Metadata = append(response.Metadata, Metadatum{"dry_run", request.Params.DryRun})
+	response.Metadata = append(response.Metadata, Metadatum{"dry_run", fmt.Sprintf("%v", request.Params.DryRun)})
 	response.Version.Ref = "none"
 	return &response
 }
