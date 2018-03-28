@@ -1,1 +1,4 @@
 Dockerfile
+artifacts
+private_input.json
+.git

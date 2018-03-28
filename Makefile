@@ -30,3 +30,5 @@ docker-push: docker
 
 clean:
 	rm -rf $(ARTIFACTS_DIR)
+
+.PHONY: default all test artifacts docker docker-push clean
