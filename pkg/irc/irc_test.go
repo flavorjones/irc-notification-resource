@@ -1,10 +1,10 @@
-package main_test
+package irc_test
 
 import (
 	"bytes"
 	"os"
 
-	. "github.com/flavorjones/irc-notification-resource/cmd/out"
+	. "github.com/flavorjones/irc-notification-resource/pkg/irc"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

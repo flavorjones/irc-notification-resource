@@ -5,7 +5,7 @@ default: test
 all: test docker
 
 test: artifacts integration_test.sh
-	cd cmd/out && go test
+	cd pkg/irc && go test
 	./integration_test.sh
 
 artifacts: $(ARTIFACTS_DIR)/check $(ARTIFACTS_DIR)/in $(ARTIFACTS_DIR)/out
