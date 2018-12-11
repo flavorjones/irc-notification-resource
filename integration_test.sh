@@ -14,7 +14,9 @@ cat > $tempdir/input.json <<EOF
     "port": 7070,
     "channel": "#random",
     "user": "randobot1337",
-    "password": "secretsecret"
+    "password": "secretsecret",
+    "usetls": true,
+    "join": false
   },
   "params": {
     "message": "This is from \${BUILD_ID}, a.k.a. \${BUILD_NAME}, see \${BUILD_URL}",
@@ -40,6 +42,14 @@ cat > $tempdir/expected.json <<EOF
     {
       "name": "user",
       "value": "randobot1337"
+    },
+    {
+      "name": "usetls",
+      "value": "true"
+    },
+    {
+      "name": "join",
+      "value": "false"
     },
     {
       "name": "message",
