@@ -32,42 +32,42 @@ var _ = Describe("Out", func() {
 		Describe("required Source property", func() {
 			Describe("`server`", func() {
 				It("errors if not present", func() {
-					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": true, "join": false}}`))
+					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}}`))
 					Expect(error.Error()).To(MatchRegexp(`No server was provided`))
 				})
 			})
 
 			Describe("`port`", func() {
 				It("errors if not present", func() {
-					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": true, "join": false}}`))
+					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "channel": "#random", "user": "randobot1337", "password": "secretsecret"}}`))
 					Expect(error.Error()).To(MatchRegexp(`No port was provided`))
 				})
 			})
 
 			Describe("`channel`", func() {
 				It("errors if not present", func() {
-					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "user": "randobot1337", "password": "secretsecret", "usetls": true, "join": false}}`))
+					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "user": "randobot1337", "password": "secretsecret"}}`))
 					Expect(error.Error()).To(MatchRegexp(`No channel was provided`))
 				})
 			})
 
 			Describe("`user`", func() {
 				It("errors if not present", func() {
-					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "password": "secretsecret", "usetls": true, "join": false}}`))
+					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "password": "secretsecret"}}`))
 					Expect(error.Error()).To(MatchRegexp(`No user was provided`))
 				})
 			})
 
 			Describe("`password`", func() {
 				It("errors if not present", func() {
-					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "usetls": true, "join": false}}`))
+					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337"}}`))
 					Expect(error.Error()).To(MatchRegexp(`No password was provided`))
 				})
 			})
 		})
 
 		It("returns correct Params values", func() {
-			request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": true, "join": false}, "params": {"message": "foo $BUILD_ID"}}`))
+			request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}, "params": {"message": "foo $BUILD_ID"}}`))
 			Expect(error).To(BeNil())
 			Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{
 				"Message": Equal("foo $BUILD_ID"),
@@ -77,7 +77,7 @@ var _ = Describe("Out", func() {
 		Describe("required Params property", func() {
 			Describe("`message`", func() {
 				It("errors if not present", func() {
-					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": true, "join": false}}`))
+					_, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}}`))
 					Expect(error.Error()).To(MatchRegexp(`No message was provided`))
 				})
 			})
@@ -86,19 +86,19 @@ var _ = Describe("Out", func() {
 		Describe("optional Params property", func() {
 			Describe("`dry_run`", func() {
 				It("defaults to false", func() {
-					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": true, "join": false}, "params": {"message": "foo $BUILD_ID"}}`))
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}, "params": {"message": "foo $BUILD_ID"}}`))
 					Expect(error).To(BeNil())
 					Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{"DryRun": BeFalse()}))
 				})
 
 				It("is settable to true", func() {
-					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": true, "join": false}, "params": {"message": "foo $BUILD_ID", "dry_run": true}}`))
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}, "params": {"message": "foo $BUILD_ID", "dry_run": true}}`))
 					Expect(error).To(BeNil())
 					Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{"DryRun": BeTrue()}))
 				})
 
 				It("is settable to false", func() {
-					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": true, "join": false}, "params": {"message": "foo $BUILD_ID", "dry_run": false}}`))
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}, "params": {"message": "foo $BUILD_ID", "dry_run": false}}`))
 					Expect(error).To(BeNil())
 					Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{"DryRun": BeFalse()}))
 				})
