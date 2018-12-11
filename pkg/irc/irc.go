@@ -54,6 +54,10 @@ const buildUrlTemplate = "${ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines
 func ParseAndCheckRequest(reader io.Reader) (*Request, error) {
 	request := Request{}
 
+	request.Source.UseTLS = true
+	request.Source.Join = false
+	request.Params.DryRun = false
+
 	err := json.NewDecoder(reader).Decode(&request)
 	if err != nil {
 		return &request, err
@@ -65,7 +69,6 @@ func ParseAndCheckRequest(reader io.Reader) (*Request, error) {
 	if request.Source.Port == 0 {
 		return &request, errors.New("No port was provided")
 	}
-
 	if request.Source.Channel == "" {
 		return &request, errors.New("No channel was provided")
 	}

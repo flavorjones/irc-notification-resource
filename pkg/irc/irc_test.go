@@ -66,6 +66,48 @@ var _ = Describe("Out", func() {
 			})
 		})
 
+		Describe("optional Source property", func() {
+			Describe("usetls", func() {
+				It("defaults to true", func() {
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}, "params": {"message": "foo"}}`))
+					Expect(error).To(BeNil())
+					Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"UseTLS": BeTrue()}))
+				})
+
+				It("is settable to true", func() {
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": true}, "params": {"message": "foo"}}`))
+					Expect(error).To(BeNil())
+					Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"UseTLS": BeTrue()}))
+				})
+
+				It("is settable to false", func() {
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "usetls": false}, "params": {"message": "foo"}}`))
+					Expect(error).To(BeNil())
+					Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"UseTLS": BeFalse()}))
+				})
+			})
+
+			Describe("join", func() {
+				It("defaults to false", func() {
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}, "params": {"message": "foo"}}`))
+					Expect(error).To(BeNil())
+					Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Join": BeFalse()}))
+				})
+
+				It("is settable to true", func() {
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "join": true}, "params": {"message": "foo"}}`))
+					Expect(error).To(BeNil())
+					Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Join": BeTrue()}))
+				})
+
+				It("is settable to false", func() {
+					request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret", "join": false}, "params": {"message": "foo"}}`))
+					Expect(error).To(BeNil())
+					Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Join": BeFalse()}))
+				})
+			})
+		})
+
 		It("returns correct Params values", func() {
 			request, error := ParseAndCheckRequest(bytes.NewBufferString(`{"source": {"server": "chat.freenode.net", "port": 7070, "channel": "#random", "user": "randobot1337", "password": "secretsecret"}, "params": {"message": "foo $BUILD_ID"}}`))
 			Expect(error).To(BeNil())
