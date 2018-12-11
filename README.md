@@ -10,39 +10,36 @@ These parameters go into the `source` fields of the resource type.
 
 ### Required
 
-* `server`: the IRC server domain name
-* `port`: the TCP port on which to connect
-* `channel`: the name of the channel to be notified (should include leading `#`, e.g., `#go-nuts`)
-* `user`: the username used for authentication
-* `password`: the password used for authentication
+* `server`: The IRC server fully qualified domain name.
+* `port`: The TCP port on which to connect.
+* `channel`: The name of the channel to be notified (should include leading `#`, e.g., `#go-nuts`).
+* `user`: The username used for authentication.
+* `password`: The password used for authentication.
 
 
 ### Optional
 
-* `use_tls`: use TLS (a.k.a. SSL) to encrypt your connection (default: __`true`__)
-* `nick`: the publicly visible nickname for the connection (default: same as `user` parameter)
+* `usetls`: Use TLS (a.k.a. SSL) to encrypt your connection to the IRC server. [default: __`true`__]
+* `join`: Join the channel before sending the message (and leave afterwards). This is necessary if the channel mode includes `+n`. [default: __`false`__]
 
 
 ## Behaviour
 
 ### `check`, `in`
 
-This resource only supports the `put` phase of a job plan, so these
-are effectively no-ops.
+This resource only supports the `put` phase of a job plan, so these are no-ops.
 
 
 ### `out`
 
-Connects to the IRC server, authenticates, and sends the given message
-to the named channel via a `PRIVMSG` command.
+Connects to the IRC server, authenticates, and sends the given message to the named channel via a `PRIVMSG` command.
 
 
 #### Parameters
 
 * `message`: The text of the message to be sent.
 
-Any Concourse [metadata][] in the `message` will be evaluated prior to
-sending the tweet.
+Any Concourse [metadata][] in the `message` will be evaluated prior to sending the tweet.
 
 Note also that the pseudo-metadata `BUILD_URL` will expand to:
 
@@ -85,15 +82,18 @@ jobs:
 Pull requests are welcome, as are Github issues opened to discuss bugs or desired features.
 
 
-### Running the tests
+### Development and Running the tests
 
-Requires `go` and `make` to be installed.
+Requires
+
+* `go` >= 1.11
+* `make`
 
 ``` sh
 make test
 ```
 
-Or using the `Dockerfile`, which runs the tests as part of the image build:
+Or if you prefer to use Docker, using the `Dockerfile`, which runs the tests as part of the image build:
 
 ```
 make docker
