@@ -8,7 +8,8 @@ test: integration_test.sh unit
 	./integration_test.sh
 
 unit: artifacts
-	cd pkg/irc && go test
+	ginkgo -r
+
 
 artifacts: $(ARTIFACTS_DIR)/check $(ARTIFACTS_DIR)/in $(ARTIFACTS_DIR)/out
 
