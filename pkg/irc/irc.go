@@ -52,6 +52,8 @@ type Response struct {
 
 const buildUrlTemplate = "${ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
 
+const resourceName = "flavorjones/irc-notification-resource"
+
 func ParseAndCheckRequest(reader io.Reader) (*Request, error) {
 	request := Request{}
 
@@ -109,30 +111,48 @@ func BuildResponse(request *Request, message string) *Response {
 }
 
 func SendMessage(request *Request, message string) error {
-	conn := irc.New(request.Source.User, request.Source.User)
+	var logger *log.Logger
+	if request.Source.Debug {
+		logger = log.New(os.Stderr, "", log.LstdFlags)
+	} else {
+		logger = log.New(ioutil.Discard, "", 0) // be completely silent
+	}
 
+	conn := irc.New(request.Source.User, request.Source.User)
 	conn.UseTLS = request.Source.UseTLS
-	conn.Log = log.New(ioutil.Discard, "", 0) // be completely silent
 	conn.Password = request.Source.Password
+	conn.Debug = request.Source.Debug
+	conn.Log = logger
 
 	conn.AddCallback("001", func(*irc.Event) {
 		if request.Source.Join {
+			logger.Printf("%s: joining channel `%s`\n", resourceName, request.Source.Channel)
 			conn.Join(request.Source.Channel)
 		}
+
+		logger.Printf("%s: sending PRIVMSG `%s`\n", resourceName, message)
 		conn.Privmsg(request.Source.Channel, message)
+
 		if request.Source.Join {
+			logger.Printf("%s: parting channel `%s`\n", resourceName, request.Source.Channel)
 			conn.Part(request.Source.Channel)
 		}
+
+		logger.Printf("%s: quitting connection\n", resourceName)
 		conn.Quit()
 	})
 
-	err := conn.Connect(connString(request))
+	connectionString := connString(request)
+	logger.Printf("%s: starting connection to `%s`\n", resourceName, connectionString)
+	err := conn.Connect(connectionString)
 	if err != nil {
 		return err
 	}
 
+	logger.Printf("%s: entering read/write loop\n", resourceName)
 	conn.Loop()
 
+	logger.Printf("%s: done.\n", resourceName)
 	return nil
 }
 
