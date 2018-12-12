@@ -4,9 +4,11 @@ default: test
 
 all: test docker
 
-test: artifacts integration_test.sh
-	cd pkg/irc && go test
+test: integration_test.sh unit
 	./integration_test.sh
+
+unit: artifacts
+	cd pkg/irc && go test
 
 artifacts: $(ARTIFACTS_DIR)/check $(ARTIFACTS_DIR)/in $(ARTIFACTS_DIR)/out
 
@@ -31,4 +33,4 @@ docker-push: docker
 clean:
 	rm -rf $(ARTIFACTS_DIR)
 
-.PHONY: default all test artifacts docker docker-push clean
+.PHONY: default all test artifacts docker docker-push clean unit
