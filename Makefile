@@ -20,7 +20,7 @@ $(ARTIFACTS_DIR)/in: cmd/in/in.go
 	go get -d ./cmd/$(shell basename $@)
 	go build -o $@ ./cmd/$(shell basename $@)
 
-$(ARTIFACTS_DIR)/out: cmd/out/out.go
+$(ARTIFACTS_DIR)/out: cmd/out/out.go pkg/irc/irc.go
 	go get -d ./cmd/$(shell basename $@)
 	go build -o $@ ./cmd/$(shell basename $@)
 
