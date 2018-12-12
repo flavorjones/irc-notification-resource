@@ -4,12 +4,13 @@ default: test
 
 all: test docker
 
-test: integration_test.sh unit
-	./integration_test.sh
+test: unit integration
 
 unit: artifacts
 	ginkgo -r
 
+integration: artifacts integration_test.sh
+	./integration_test.sh
 
 artifacts: $(ARTIFACTS_DIR)/check $(ARTIFACTS_DIR)/in $(ARTIFACTS_DIR)/out
 
