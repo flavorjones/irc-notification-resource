@@ -23,6 +23,7 @@ type Source struct {
 	Password string `json:"password"`
 	UseTLS   bool   `json:"usetls"`
 	Join     bool   `json:"join"`
+	Debug    bool   `json:"debug"`
 }
 
 type Params struct {
@@ -54,8 +55,10 @@ const buildUrlTemplate = "${ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines
 func ParseAndCheckRequest(reader io.Reader) (*Request, error) {
 	request := Request{}
 
+	// defaults
 	request.Source.UseTLS = true
 	request.Source.Join = false
+	request.Source.Debug = false
 	request.Params.DryRun = false
 
 	err := json.NewDecoder(reader).Decode(&request)
@@ -98,6 +101,7 @@ func BuildResponse(request *Request, message string) *Response {
 	response.Metadata = append(response.Metadata, Metadatum{"user", request.Source.User})
 	response.Metadata = append(response.Metadata, Metadatum{"usetls", fmt.Sprintf("%v", request.Source.UseTLS)})
 	response.Metadata = append(response.Metadata, Metadatum{"join", fmt.Sprintf("%v", request.Source.Join)})
+	response.Metadata = append(response.Metadata, Metadatum{"debug", fmt.Sprintf("%v", request.Source.Debug)})
 	response.Metadata = append(response.Metadata, Metadatum{"message", message})
 	response.Metadata = append(response.Metadata, Metadatum{"dry_run", fmt.Sprintf("%v", request.Params.DryRun)})
 	response.Version.Ref = "none"

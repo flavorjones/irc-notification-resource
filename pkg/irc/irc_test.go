@@ -29,6 +29,7 @@ var _ = Describe("Out", func() {
 	var minimalJson = func() string {
 		delete(sourceMap, "usetls")
 		delete(sourceMap, "join")
+		delete(sourceMap, "debug")
 		delete(paramsMap, "dry_run")
 		return messageJson()
 	}
@@ -43,6 +44,7 @@ var _ = Describe("Out", func() {
 		sourceMap["password"] = "secretsecret"
 		sourceMap["usetls"] = true
 		sourceMap["join"] = false
+		sourceMap["debug"] = false
 		paramsMap["message"] = "foo $BUILD_ID"
 		paramsMap["dry_run"] = false
 	})
@@ -50,7 +52,7 @@ var _ = Describe("Out", func() {
 	Describe("test setup", func() {
 		Context("default message json", func() {
 			It("is as expected", func() {
-				Expect(messageJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"channel":"#random","join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
+				Expect(messageJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"channel":"#random","debug":false,"join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
 			})
 
 			Context("without a key", func() {
@@ -58,7 +60,7 @@ var _ = Describe("Out", func() {
 					delete(sourceMap, "channel")
 				})
 				It("is as expected", func() {
-					Expect(messageJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
+					Expect(messageJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"debug":false,"join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
 				})
 			})
 		})
@@ -91,6 +93,7 @@ var _ = Describe("Out", func() {
 				"Password": Equal("secretsecret"),
 				"UseTLS":   Equal(true),
 				"Join":     Equal(false),
+				"Debug":    Equal(false),
 			}))
 		})
 
@@ -220,6 +223,38 @@ var _ = Describe("Out", func() {
 					})
 				})
 			})
+
+			Describe("`debug`", func() {
+				Context("when not present", func() {
+					It("defaults to false", func() {
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						Expect(error).To(BeNil())
+						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Debug": BeFalse()}))
+					})
+				})
+
+				Context("when set to true", func() {
+					BeforeEach(func() {
+						sourceMap["debug"] = true
+					})
+					It("is true", func() {
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						Expect(error).To(BeNil())
+						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Debug": BeTrue()}))
+					})
+				})
+
+				Context("when set to false", func() {
+					BeforeEach(func() {
+						sourceMap["debug"] = false
+					})
+					It("is false", func() {
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						Expect(error).To(BeNil())
+						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Debug": BeFalse()}))
+					})
+				})
+			})
 		})
 
 		It("returns correct Params values", func() {
@@ -290,10 +325,8 @@ var _ = Describe("Out", func() {
 					Channel:  "#random",
 					User:     "randobot1337",
 					Password: "secretsecret",
-					UseTLS:   true,
-					Join:     false,
 				},
-				Params: Params{DryRun: true},
+				Params: Params{},
 			}
 
 			os.Setenv("BUILD_ID", "id-123")
@@ -331,6 +364,7 @@ var _ = Describe("Out", func() {
 					Password: "secretsecret",
 					UseTLS:   true,
 					Join:     false,
+					Debug:    false,
 				},
 				Params: Params{DryRun: true},
 			}
@@ -359,6 +393,7 @@ var _ = Describe("Out", func() {
 					Metadatum{"user", "randobot1337"},
 					Metadatum{"usetls", "true"},
 					Metadatum{"join", "false"},
+					Metadatum{"debug", "false"},
 					Metadatum{"message", "this is a message"},
 					Metadatum{"dry_run", "true"},
 				}))
