@@ -19,8 +19,9 @@ These parameters go into the `source` fields of the resource type.
 
 ### Optional
 
-* `usetls`: Use TLS (a.k.a. SSL) to encrypt your connection to the IRC server. [default: __`true`__]
-* `join`: Join the channel before sending the message (and leave afterwards). This is necessary if the channel mode includes `+n`. [default: __`false`__]
+* `usetls`: [default: __`true`__] Use TLS (a.k.a. SSL) to encrypt your connection to the IRC server.
+* `join`: [default: __`false`__] Join the channel before sending the message (and leave afterwards). This is necessary if the channel mode includes `+n`.
+* `debug`: [default: __`false`__] Emit debugging messages on `stderr`. __WARNING__: Setting this to `true` will log the password, so use with caution.
 
 
 ## Behaviour
