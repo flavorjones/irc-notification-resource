@@ -1,2 +1,3 @@
 artifacts
+ci/private.yml
 private_input.json

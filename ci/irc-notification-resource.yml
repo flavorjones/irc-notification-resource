@@ -1,0 +1,33 @@
+resources:
+  - name: ci
+    type: git
+    source:
+      uri: https://github.com/flavorjones/irc-notification-resource/
+      branch: master
+      disable_ci_skip: true # always get the latest pipeline configuration
+  - name: irc-notification-resource
+    type: git
+    source:
+      uri: https://github.com/flavorjones/irc-notification-resource/
+      branch: master
+      ignore_paths:
+        - ci/**
+
+jobs:
+  - name: master
+    public: true
+    plan:
+      - get: ci
+      - get: irc-notification-resource
+        trigger: true
+      - task: make-test
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source: { repository: golang, tag: "1.11" }
+          inputs:
+            - name: ci
+            - name: irc-notification-resource
+          run:
+            path: ci/ci/tasks/make-test/run.sh

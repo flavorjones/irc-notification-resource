@@ -15,15 +15,15 @@ integration: artifacts integration_test.sh
 artifacts: $(ARTIFACTS_DIR)/check $(ARTIFACTS_DIR)/in $(ARTIFACTS_DIR)/out
 
 $(ARTIFACTS_DIR)/check: cmd/check/check.go
-	go get -d ./cmd/$(shell basename $@)
+	go get ./cmd/$(shell basename $@)
 	go build -o $@ ./cmd/$(shell basename $@)
 
 $(ARTIFACTS_DIR)/in: cmd/in/in.go
-	go get -d ./cmd/$(shell basename $@)
+	go get ./cmd/$(shell basename $@)
 	go build -o $@ ./cmd/$(shell basename $@)
 
 $(ARTIFACTS_DIR)/out: cmd/out/out.go pkg/irc/irc.go
-	go get -d ./cmd/$(shell basename $@)
+	go get ./cmd/$(shell basename $@)
 	go build -o $@ ./cmd/$(shell basename $@)
 
 docker: Dockerfile
