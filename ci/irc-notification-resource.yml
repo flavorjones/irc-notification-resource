@@ -1,3 +1,10 @@
+resource_types:
+  - name: irc-notification
+    type: docker-image
+    source:
+      repository: flavorjones/irc-notification-resource
+
+
 resources:
   - name: ci
     type: git
@@ -12,6 +19,17 @@ resources:
       branch: master
       ignore_paths:
         - ci/**
+  - name: "freenode #random"
+    type: irc-notification
+    source:
+      server: chat.freenode.net
+      port: 7070
+      channel: "#random"
+      user: ((nokobot-irc-username))
+      password: ((nokobot-irc-password))
+      usetls: true
+      join: true
+      debug: true # danger, make sure the job is private
 
 jobs:
   - name: master
@@ -31,3 +49,10 @@ jobs:
             - name: irc-notification-resource
           run:
             path: ci/ci/tasks/make-test/run.sh
+
+  - name: test-notification
+    public: false # needs to be private because debug messages contain the password
+    plan:
+      - put: "freenode #random"
+        params:
+          message: "This is a test."
