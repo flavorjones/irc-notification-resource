@@ -3,6 +3,10 @@ resource_types:
     type: docker-image
     source:
       repository: flavorjones/irc-notification-resource
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: teliaoss/github-pr-resource
 
 
 resources:
@@ -19,6 +23,14 @@ resources:
       branch: master
       ignore_paths:
         - ci/**
+  - name: inr-pr
+    type: pull-request
+    check_every: 15m
+    # webhook: https://ci.nokogiri.org/api/v1/teams/flavorjones/pipelines/irc-notification-resource/resources/inr-pr/check/webhook?webhook_token=WEBHOOK_TOKEN
+    webhook_token: ((inr-pr-webhook-token))
+    source:
+      repository: flavorjones/irc-notification-resource
+      access_token: ((github-repo-status-access-token))
   - name: "freenode #random"
     type: irc-notification
     source:
@@ -49,6 +61,51 @@ jobs:
             - name: irc-notification-resource
           run:
             path: ci/ci/tasks/make-test/run.sh
+
+
+  - name: pr-pending
+    public: true
+    plan:
+      - get: ci
+      - get: inr-pr
+        trigger: true
+        version: every
+      - put: inr-pr
+        params: {path: inr-pr, status: PENDING}
+  - name: make-test-pr
+    public: true
+    plan:
+      - get: ci
+      - get: inr-pr
+        trigger: true
+        version: every
+        passed: [pr-pending]
+      - task: make-test
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source: { repository: "flavorjones/irc-notification-resource", tag: "test" }
+          inputs:
+            - name: ci
+            - name: inr-pr
+              path: irc-notification-resource
+          run:
+            path: ci/ci/tasks/make-test/run.sh
+        on_failure:
+          put: inr-pr
+          params: {path: inr-pr, status: FAILURE}
+  - name: pr-success
+    public: true
+    disable_manual_trigger: true
+    plan:
+      - get: inr-pr
+        trigger: true
+        version: every
+        passed: [make-test-pr]
+      - put: inr-pr
+        params: {path: inr-pr, status: SUCCESS}
+
 
   - name: test-notification
     public: false # needs to be private because debug messages contain the password
