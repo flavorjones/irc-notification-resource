@@ -12,6 +12,8 @@ import (
 	"github.com/Elemental-IRCd/irc"
 )
 
+const VERSION = "v1.1.0"
+
 //
 //  structs for reading and writing our json
 //
@@ -98,6 +100,7 @@ func ExpandMessage(request *Request) string {
 func BuildResponse(request *Request, message string) *Response {
 	// omit password for reasons that are hopefully obvious
 	response := Response{}
+	response.Metadata = append(response.Metadata, Metadatum{"resource_version", VERSION})
 	response.Metadata = append(response.Metadata, Metadatum{"host", connString(request)})
 	response.Metadata = append(response.Metadata, Metadatum{"channel", request.Source.Channel})
 	response.Metadata = append(response.Metadata, Metadatum{"user", request.Source.User})

@@ -7,6 +7,8 @@ fi
 
 tempdir=$(mktemp -d "${TMPDIR:-/tmp/}$(basename $0).XXXXXXXXXXXX")
 
+resource_version=$(fgrep "const VERSION" pkg/irc/irc.go  | cut -d'"' -f2)
+
 cat > $tempdir/input.json <<EOF
 {
   "source": {
@@ -32,6 +34,10 @@ cat > $tempdir/expected.json <<EOF
     "ref": "none"
   },
   "metadata": [
+    {
+      "name": "resource_version",
+      "value": "${resource_version}"
+    },
     {
       "name": "host",
       "value": "chat.freenode.net:7070"
