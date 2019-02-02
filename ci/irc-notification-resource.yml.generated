@@ -27,7 +27,7 @@ resources:
     type: pull-request
     check_every: 15m
     # webhook: https://ci.nokogiri.org/api/v1/teams/flavorjones/pipelines/irc-notification-resource/resources/inr-pr/check/webhook?webhook_token=WEBHOOK_TOKEN
-    webhook_token: ((inr-pr-webhook-token))
+    webhook_token: ((irc-notification-resource-pr-webhook-token))
     source:
       repository: flavorjones/irc-notification-resource
       access_token: ((github-repo-status-access-token))
