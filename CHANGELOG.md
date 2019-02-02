@@ -1,5 +1,13 @@
 # Changelog for flavorjones/irc-notification-resource
 
+## v1.2.0 / 2019-02-01
+
+Features:
+
+* add a `debug` option [#8]
+* emit `resource_version` in resource metadata [#7]
+
+
 ## v1.1.0 / 2018-12-11
 
 Features:

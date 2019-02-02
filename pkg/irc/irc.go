@@ -12,7 +12,7 @@ import (
 	"github.com/Elemental-IRCd/irc"
 )
 
-const VERSION = "v1.1.0"
+const VERSION = "v1.2.0"
 
 //
 //  structs for reading and writing our json
