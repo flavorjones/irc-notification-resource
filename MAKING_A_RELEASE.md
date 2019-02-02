@@ -3,6 +3,7 @@
 
 - [ ] Update `CHANGELOG.md`
 - [ ] Update `README.md` if necessary
+- [ ] Bump version in `pkg/irc/irc.go`
 - [ ] Commit and push.
 - [ ] Create a git tag and push it
 - [ ] `make all` to create a docker image

@@ -49,6 +49,12 @@ var _ = Describe("Out", func() {
 		paramsMap["dry_run"] = false
 	})
 
+	Describe("VERSION", func() {
+		It("provides a version string", func() {
+			Expect(VERSION).To(MatchRegexp(`^v\d+\.\d+\.\d+$`))
+		})
+	})
+
 	Describe("test setup", func() {
 		Context("default message json", func() {
 			It("is as expected", func() {
@@ -388,6 +394,7 @@ var _ = Describe("Out", func() {
 			It("contains specific metadata", func() {
 				response := BuildResponse(&request, message)
 				Expect(response.Metadata).To(Equal([]Metadatum{
+					Metadatum{"resource_version", VERSION},
 					Metadatum{"host", "chat.freenode.net:7070"},
 					Metadatum{"channel", "#random"},
 					Metadatum{"user", "randobot1337"},
