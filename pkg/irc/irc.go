@@ -29,8 +29,9 @@ type Source struct {
 }
 
 type Params struct {
-	Message string `json:"message"`
-	DryRun  bool   `json:"dry_run"` // undocumented
+	Message     string `json:"message,omitempty"`
+	MessageFile string `json:"message_file,omitempty"`
+	DryRun      bool   `json:"dry_run"` // undocumented
 }
 
 type Request struct {
@@ -85,16 +86,19 @@ func ParseAndCheckRequest(reader io.Reader) (*Request, error) {
 	if request.Source.Password == "" {
 		return &request, errors.New("No password was provided")
 	}
-	if request.Params.Message == "" {
-		return &request, errors.New("No message was provided")
+	if request.Params.Message == "" && request.Params.MessageFile == "" {
+		return &request, errors.New("Either message or message_file must be set")
+	}
+	if request.Params.Message != "" && request.Params.MessageFile != "" {
+		return &request, errors.New("You may only use one of message or message_file at a time")
 	}
 
 	return &request, nil
 }
 
-func ExpandMessage(request *Request) string {
+func ExpandMessage(message string) string {
 	os.Setenv("BUILD_URL", os.ExpandEnv(buildUrlTemplate))
-	return os.ExpandEnv(request.Params.Message)
+	return os.ExpandEnv(message)
 }
 
 func BuildResponse(request *Request, message string) *Response {

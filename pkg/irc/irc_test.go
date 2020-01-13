@@ -272,14 +272,15 @@ var _ = Describe("Out", func() {
 		})
 
 		Describe("required Params property", func() {
-			Describe("`message`", func() {
+			Describe("`message and message_file`", func() {
 				Context("when not present", func() {
 					BeforeEach(func() {
 						delete(paramsMap, "message")
+						delete(paramsMap, "message_file")
 					})
 					It("errors", func() {
 						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
-						Expect(error.Error()).To(MatchRegexp(`No message was provided`))
+						Expect(error.Error()).To(MatchRegexp(`Either message or message_file must be set`))
 					})
 				})
 			})
@@ -345,13 +346,13 @@ var _ = Describe("Out", func() {
 
 		It("expands environment variables", func() {
 			request.Params.Message = ">> $BUILD_ID <<"
-			message := ExpandMessage(&request)
+			message := ExpandMessage(request.Params.Message)
 			Expect(message).To(Equal(">> id-123 <<"))
 		})
 
 		It("expands BUILD_URL pseudo-metadata", func() {
 			request.Params.Message = ">> $BUILD_URL <<"
-			message := ExpandMessage(&request)
+			message := ExpandMessage(request.Params.Message)
 			Expect(message).To(Equal(">> https://ci.example.com/teams/team-name-asdf/pipelines/pipeline-name-asdf/jobs/job-name-asdf/builds/name-asdf <<"))
 		})
 	})

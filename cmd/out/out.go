@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path"
 
 	"github.com/flavorjones/irc-notification-resource/pkg/irc"
 )
@@ -14,12 +16,35 @@ func exitWithError(error interface{}) {
 }
 
 func main() {
-	request, err := irc.ParseAndCheckRequest(os.Stdin)
+	var (
+		destPath string
+		data     []byte
+		message  string
+		request  *irc.Request
+		err      error
+	)
+
+	request, err = irc.ParseAndCheckRequest(os.Stdin)
 	if err != nil {
 		exitWithError(err)
 	}
 
-	message := irc.ExpandMessage(request)
+	if request.Params.Message != "" {
+		message = request.Params.Message
+	}
+
+	if request.Params.MessageFile != "" {
+		destPath = path.Join(os.Args[1], request.Params.MessageFile)
+		data, err = ioutil.ReadFile(destPath)
+
+		if err != nil {
+			exitWithError(err)
+		}
+
+		message = string(data)
+	}
+
+	message = irc.ExpandMessage(message)
 
 	if !request.Params.DryRun {
 		irc.SendMessage(request, message)
