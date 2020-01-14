@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/Elemental-IRCd/irc"
 )
@@ -138,7 +139,7 @@ func SendMessage(request *Request, message string) error {
 		}
 
 		logger.Printf("%s: sending PRIVMSG `%s`\n", resourceName, message)
-		conn.Privmsg(request.Source.Channel, message)
+		sendStrings(request, conn, message)
 
 		if request.Source.Join {
 			logger.Printf("%s: parting channel `%s`\n", resourceName, request.Source.Channel)
@@ -165,4 +166,12 @@ func SendMessage(request *Request, message string) error {
 
 func connString(request *Request) string {
 	return fmt.Sprintf("%s:%d", request.Source.Server, request.Source.Port)
+}
+
+func sendStrings(request *Request, conn *irc.Connection, message string) {
+	messageLines := strings.Split(message, "\n")
+
+	for _, line := range messageLines {
+		conn.Privmsg(request.Source.Channel, line)
+	}
 }
