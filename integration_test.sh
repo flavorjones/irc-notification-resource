@@ -1,4 +1,11 @@
 #! /usr/bin/env bash
+set -o errexit \
+    -o pipefail
+
+if [[ -n "${DEBUG}" ]]; then
+  set -o xtrace \
+      -o verbose
+fi
 
 if [[ ! -e artifacts/out ]] ; then
   echo "ERROR: artifacts/out doesn't exist, try running 'make'"
