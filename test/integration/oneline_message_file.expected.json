@@ -1,0 +1,43 @@
+{
+  "version": {
+    "ref": "none"
+  },
+  "metadata": [
+    {
+      "name": "resource_version",
+      "value": "${resource_version}"
+    },
+    {
+      "name": "host",
+      "value": "chat.freenode.net:7070"
+    },
+    {
+      "name": "channel",
+      "value": "#random"
+    },
+    {
+      "name": "user",
+      "value": "randobot1337"
+    },
+    {
+      "name": "usetls",
+      "value": "true"
+    },
+    {
+      "name": "join",
+      "value": "true"
+    },
+    {
+      "name": "debug",
+      "value": "true"
+    },
+    {
+      "name": "message",
+      "value": "baz id-123 in a file\n"
+    },
+    {
+      "name": "dry_run",
+      "value": "true"
+    }
+  ]
+}

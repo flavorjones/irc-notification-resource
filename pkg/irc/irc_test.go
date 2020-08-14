@@ -19,19 +19,24 @@ var _ = Describe("Out", func() {
 	//  make it easy to generate JSON strings that are set up within each Describe block
 	//
 	var sourceMap, paramsMap GenericMap
-	var messageJson = func() string {
-		messageMap := make(GenericMap)
-		messageMap["source"] = sourceMap
-		messageMap["params"] = paramsMap
-		message, _ := json.Marshal(messageMap)
+	var requestJson = func() string {
+		requestMap := make(GenericMap)
+		requestMap["source"] = sourceMap
+		requestMap["params"] = paramsMap
+		message, _ := json.Marshal(requestMap)
 		return string(message)
 	}
-	var minimalJson = func() string {
+	var minimalRequestJson = func() string {
 		delete(sourceMap, "usetls")
 		delete(sourceMap, "join")
 		delete(sourceMap, "debug")
 		delete(paramsMap, "dry_run")
-		return messageJson()
+		return requestJson()
+	}
+	var messageFileRequestJson = func() string {
+		delete(paramsMap, "message")
+		paramsMap["message_file"] = "test/one-line-message-file.txt"
+		return minimalRequestJson()
 	}
 
 	BeforeEach(func() {
@@ -56,9 +61,9 @@ var _ = Describe("Out", func() {
 	})
 
 	Describe("test setup", func() {
-		Context("default message json", func() {
+		Describe("test request json", func() {
 			It("is as expected", func() {
-				Expect(messageJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"channel":"#random","debug":false,"join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
+				Expect(requestJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"channel":"#random","debug":false,"join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
 			})
 
 			Context("without a key", func() {
@@ -66,14 +71,14 @@ var _ = Describe("Out", func() {
 					delete(sourceMap, "channel")
 				})
 				It("is as expected", func() {
-					Expect(messageJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"debug":false,"join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
+					Expect(requestJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"debug":false,"join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
 				})
 			})
 		})
 
-		Context("minimal message json", func() {
+		Describe("test minimal request json", func() {
 			It("is as expected", func() {
-				Expect(minimalJson()).To(Equal(`{"params":{"message":"foo $BUILD_ID"},"source":{"channel":"#random","password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337"}}`))
+				Expect(minimalRequestJson()).To(Equal(`{"params":{"message":"foo $BUILD_ID"},"source":{"channel":"#random","password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337"}}`))
 			})
 
 			Context("without a key", func() {
@@ -81,15 +86,21 @@ var _ = Describe("Out", func() {
 					delete(sourceMap, "channel")
 				})
 				It("is as expected", func() {
-					Expect(minimalJson()).To(Equal(`{"params":{"message":"foo $BUILD_ID"},"source":{"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337"}}`))
+					Expect(minimalRequestJson()).To(Equal(`{"params":{"message":"foo $BUILD_ID"},"source":{"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337"}}`))
 				})
+			})
+		})
+
+		Describe("test message_file request json", func() {
+			It("is as expected", func() {
+				Expect(messageFileRequestJson()).To(Equal(`{"params":{"message_file":"test/one-line-message-file.txt"},"source":{"channel":"#random","password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337"}}`))
 			})
 		})
 	})
 
 	Describe("ParseAndCheckRequest()", func() {
 		It("returns correct Source values", func() {
-			request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+			request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 			Expect(error).To(BeNil())
 			Expect(request.Source).To(MatchAllFields(Fields{
 				"Server":   Equal("chat.freenode.net"),
@@ -110,7 +121,7 @@ var _ = Describe("Out", func() {
 						delete(sourceMap, "server")
 					})
 					It("errors", func() {
-						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error.Error()).To(MatchRegexp(`No server was provided`))
 					})
 				})
@@ -122,7 +133,7 @@ var _ = Describe("Out", func() {
 						delete(sourceMap, "port")
 					})
 					It("errors", func() {
-						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error.Error()).To(MatchRegexp(`No port was provided`))
 					})
 				})
@@ -134,7 +145,7 @@ var _ = Describe("Out", func() {
 						delete(sourceMap, "channel")
 					})
 					It("errors", func() {
-						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error.Error()).To(MatchRegexp(`No channel was provided`))
 					})
 				})
@@ -146,7 +157,7 @@ var _ = Describe("Out", func() {
 						delete(sourceMap, "user")
 					})
 					It("errors", func() {
-						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error.Error()).To(MatchRegexp(`No user was provided`))
 					})
 				})
@@ -158,7 +169,7 @@ var _ = Describe("Out", func() {
 						delete(sourceMap, "password")
 					})
 					It("errors", func() {
-						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error.Error()).To(MatchRegexp(`No password was provided`))
 					})
 				})
@@ -169,7 +180,7 @@ var _ = Describe("Out", func() {
 			Describe("`usetls`", func() {
 				Context("when not present", func() {
 					It("defaults to true", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"UseTLS": BeTrue()}))
 					})
@@ -180,7 +191,7 @@ var _ = Describe("Out", func() {
 						sourceMap["usetls"] = true
 					})
 					It("is true", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"UseTLS": BeTrue()}))
 					})
@@ -191,7 +202,7 @@ var _ = Describe("Out", func() {
 						sourceMap["usetls"] = false
 					})
 					It("is false", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"UseTLS": BeFalse()}))
 					})
@@ -201,7 +212,7 @@ var _ = Describe("Out", func() {
 			Describe("`join`", func() {
 				Context("when not present", func() {
 					It("defaults to false", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Join": BeFalse()}))
 					})
@@ -212,7 +223,7 @@ var _ = Describe("Out", func() {
 						sourceMap["join"] = true
 					})
 					It("is true", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Join": BeTrue()}))
 					})
@@ -223,7 +234,7 @@ var _ = Describe("Out", func() {
 						sourceMap["join"] = false
 					})
 					It("is false", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Join": BeFalse()}))
 					})
@@ -233,7 +244,7 @@ var _ = Describe("Out", func() {
 			Describe("`debug`", func() {
 				Context("when not present", func() {
 					It("defaults to false", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Debug": BeFalse()}))
 					})
@@ -244,7 +255,7 @@ var _ = Describe("Out", func() {
 						sourceMap["debug"] = true
 					})
 					It("is true", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Debug": BeTrue()}))
 					})
@@ -255,7 +266,7 @@ var _ = Describe("Out", func() {
 						sourceMap["debug"] = false
 					})
 					It("is false", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Source).To(MatchFields(IgnoreExtras, Fields{"Debug": BeFalse()}))
 					})
@@ -263,23 +274,38 @@ var _ = Describe("Out", func() {
 			})
 		})
 
-		It("returns correct Params values", func() {
-			request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
-			Expect(error).To(BeNil())
-			Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{
-				"Message": Equal("foo $BUILD_ID"),
-			}))
+		Context("when given a message", func() {
+			It("returns correct Params values", func() {
+				request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
+				Expect(error).To(BeNil())
+				Expect(request.Params.MessageFile).To(Equal(""))
+				Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{
+					"Message": Equal("foo $BUILD_ID"),
+				}))
+			})
+		})
+
+		Context("when given a message_file", func() {
+			It("returns correct Params values", func() {
+				request, error := ParseAndCheckRequest(bytes.NewBufferString(messageFileRequestJson()))
+				Expect(error).To(BeNil())
+				Expect(request.Params.Message).To(Equal(""))
+				Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{
+					"MessageFile": Equal("test/one-line-message-file.txt"),
+				}))
+			})
 		})
 
 		Describe("required Params property", func() {
-			Describe("`message`", func() {
-				Context("when not present", func() {
+			Describe("`message or message_file`", func() {
+				Context("when neither is present", func() {
 					BeforeEach(func() {
 						delete(paramsMap, "message")
+						delete(paramsMap, "message_file")
 					})
 					It("errors", func() {
-						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
-						Expect(error.Error()).To(MatchRegexp(`No message was provided`))
+						_, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
+						Expect(error.Error()).To(MatchRegexp(`Either message or message_file must be set`))
 					})
 				})
 			})
@@ -289,7 +315,7 @@ var _ = Describe("Out", func() {
 			Describe("`dry_run`", func() {
 				Context("when not set", func() {
 					It("defaults to false", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{"DryRun": BeFalse()}))
 					})
@@ -300,7 +326,7 @@ var _ = Describe("Out", func() {
 						paramsMap["dry_run"] = true
 					})
 					It("is true", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{"DryRun": BeTrue()}))
 					})
@@ -311,7 +337,7 @@ var _ = Describe("Out", func() {
 						paramsMap["dry_run"] = false
 					})
 					It("is false", func() {
-						request, error := ParseAndCheckRequest(bytes.NewBufferString(messageJson()))
+						request, error := ParseAndCheckRequest(bytes.NewBufferString(requestJson()))
 						Expect(error).To(BeNil())
 						Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{"DryRun": BeFalse()}))
 					})
@@ -321,20 +347,7 @@ var _ = Describe("Out", func() {
 	})
 
 	Describe("ExpandMessage()", func() {
-		var request Request
-
 		BeforeEach(func() {
-			request = Request{
-				Source: Source{
-					Server:   "chat.freenode.net",
-					Port:     7070,
-					Channel:  "#random",
-					User:     "randobot1337",
-					Password: "secretsecret",
-				},
-				Params: Params{},
-			}
-
 			os.Setenv("BUILD_ID", "id-123")
 			os.Setenv("BUILD_NAME", "name-asdf")
 			os.Setenv("BUILD_JOB_NAME", "job-name-asdf")
@@ -344,15 +357,15 @@ var _ = Describe("Out", func() {
 		})
 
 		It("expands environment variables", func() {
-			request.Params.Message = ">> $BUILD_ID <<"
-			message := ExpandMessage(&request)
-			Expect(message).To(Equal(">> id-123 <<"))
+			message := ">> $BUILD_ID <<"
+			expanded := ExpandMessage(message)
+			Expect(expanded).To(Equal(">> id-123 <<"))
 		})
 
 		It("expands BUILD_URL pseudo-metadata", func() {
-			request.Params.Message = ">> $BUILD_URL <<"
-			message := ExpandMessage(&request)
-			Expect(message).To(Equal(">> https://ci.example.com/teams/team-name-asdf/pipelines/pipeline-name-asdf/jobs/job-name-asdf/builds/name-asdf <<"))
+			message := ">> $BUILD_URL <<"
+			expanded := ExpandMessage(message)
+			Expect(expanded).To(Equal(">> https://ci.example.com/teams/team-name-asdf/pipelines/pipeline-name-asdf/jobs/job-name-asdf/builds/name-asdf <<"))
 		})
 	})
 

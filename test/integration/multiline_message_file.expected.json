@@ -1,0 +1,43 @@
+{
+  "version": {
+    "ref": "none"
+  },
+  "metadata": [
+    {
+      "name": "resource_version",
+      "value": "${resource_version}"
+    },
+    {
+      "name": "host",
+      "value": "chat.freenode.net:7070"
+    },
+    {
+      "name": "channel",
+      "value": "#random"
+    },
+    {
+      "name": "user",
+      "value": "randobot1337"
+    },
+    {
+      "name": "usetls",
+      "value": "true"
+    },
+    {
+      "name": "join",
+      "value": "true"
+    },
+    {
+      "name": "debug",
+      "value": "true"
+    },
+    {
+      "name": "message",
+      "value": "foo id-123 This is a test file.\nbar id-123 It contains a multi-line message.\nbaz id-123 Oh, joy!\n"
+    },
+    {
+      "name": "dry_run",
+      "value": "true"
+    }
+  ]
+}

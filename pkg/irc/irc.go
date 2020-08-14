@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/Elemental-IRCd/irc"
 )
@@ -29,8 +30,9 @@ type Source struct {
 }
 
 type Params struct {
-	Message string `json:"message"`
-	DryRun  bool   `json:"dry_run"` // undocumented
+	Message     string `json:"message"`
+	MessageFile string `json:"message_file"`
+	DryRun      bool   `json:"dry_run"` // undocumented
 }
 
 type Request struct {
@@ -85,16 +87,19 @@ func ParseAndCheckRequest(reader io.Reader) (*Request, error) {
 	if request.Source.Password == "" {
 		return &request, errors.New("No password was provided")
 	}
-	if request.Params.Message == "" {
-		return &request, errors.New("No message was provided")
+	if request.Params.Message == "" && request.Params.MessageFile == "" {
+		return &request, errors.New("Either message or message_file must be set")
+	}
+	if request.Params.Message != "" && request.Params.MessageFile != "" {
+		return &request, errors.New("You may only use one of message or message_file at a time")
 	}
 
 	return &request, nil
 }
 
-func ExpandMessage(request *Request) string {
+func ExpandMessage(message string) string {
 	os.Setenv("BUILD_URL", os.ExpandEnv(buildUrlTemplate))
-	return os.ExpandEnv(request.Params.Message)
+	return os.ExpandEnv(message)
 }
 
 func BuildResponse(request *Request, message string) *Response {
@@ -134,7 +139,7 @@ func SendMessage(request *Request, message string) error {
 		}
 
 		logger.Printf("%s: sending PRIVMSG `%s`\n", resourceName, message)
-		conn.Privmsg(request.Source.Channel, message)
+		sendMultilineMessage(request, conn, message)
 
 		if request.Source.Join {
 			logger.Printf("%s: parting channel `%s`\n", resourceName, request.Source.Channel)
@@ -161,4 +166,14 @@ func SendMessage(request *Request, message string) error {
 
 func connString(request *Request) string {
 	return fmt.Sprintf("%s:%d", request.Source.Server, request.Source.Port)
+}
+
+func sendMultilineMessage(request *Request, conn *irc.Connection, message string) {
+	messageLines := strings.Split(message, "\n")
+
+	for _, line := range messageLines {
+		if len(line) > 0 {
+			conn.Privmsg(request.Source.Channel, line)
+		}
+	}
 }
