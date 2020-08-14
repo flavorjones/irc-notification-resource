@@ -1,5 +1,13 @@
 # Changelog for flavorjones/irc-notification-resource
 
+## v1.3.0 / 2020-08-14
+
+Features:
+
+* multi-line notifications are split into multiple IRC messages [#16] (Thanks, @avanier!)
+* add `message_file` param to specify notification text [#16] (Thanks, @avanier!)
+
+
 ## v1.2.0 / 2019-02-01
 
 Features:
