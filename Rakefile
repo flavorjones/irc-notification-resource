@@ -1,6 +1,17 @@
 require "concourse"
+require "hoe"
+
+Hoe.plugin :markdown
 
 Concourse.new("irc-notification-resource", directory: "ci", fly_target: "flavorjones").create_tasks!
+
+Hoe.spec("irc-notification-resource") do
+  developer "Mike Dalessio", "mike.dalessio@gmail.com"
+
+  self.urls = {
+    "bugs" => "https://github.com/flavorjones/irc-notification-resource/issues",
+  }
+end
 
 #
 #  build a docker image with test dependencies
