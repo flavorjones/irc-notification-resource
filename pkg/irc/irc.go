@@ -30,8 +30,8 @@ type Source struct {
 }
 
 type Params struct {
-	Message     string `json:"message,omitempty"`
-	MessageFile string `json:"message_file,omitempty"`
+	Message     string `json:"message"`
+	MessageFile string `json:"message_file"`
 	DryRun      bool   `json:"dry_run"` // undocumented
 }
 

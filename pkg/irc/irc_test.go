@@ -33,6 +33,11 @@ var _ = Describe("Out", func() {
 		delete(paramsMap, "dry_run")
 		return requestJson()
 	}
+	var messageFileRequestJson = func() string {
+		delete(paramsMap, "message")
+		paramsMap["message_file"] = "test/one-line-message-file.txt"
+		return minimalRequestJson()
+	}
 
 	BeforeEach(func() {
 		sourceMap = make(GenericMap)
@@ -56,7 +61,7 @@ var _ = Describe("Out", func() {
 	})
 
 	Describe("test setup", func() {
-		Context("default message json", func() {
+		Describe("test request json", func() {
 			It("is as expected", func() {
 				Expect(requestJson()).To(Equal(`{"params":{"dry_run":false,"message":"foo $BUILD_ID"},"source":{"channel":"#random","debug":false,"join":false,"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337","usetls":true}}`))
 			})
@@ -71,7 +76,7 @@ var _ = Describe("Out", func() {
 			})
 		})
 
-		Context("minimal message json", func() {
+		Describe("test minimal request json", func() {
 			It("is as expected", func() {
 				Expect(minimalRequestJson()).To(Equal(`{"params":{"message":"foo $BUILD_ID"},"source":{"channel":"#random","password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337"}}`))
 			})
@@ -83,6 +88,12 @@ var _ = Describe("Out", func() {
 				It("is as expected", func() {
 					Expect(minimalRequestJson()).To(Equal(`{"params":{"message":"foo $BUILD_ID"},"source":{"password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337"}}`))
 				})
+			})
+		})
+
+		Describe("test message_file request json", func() {
+			It("is as expected", func() {
+				Expect(messageFileRequestJson()).To(Equal(`{"params":{"message_file":"test/one-line-message-file.txt"},"source":{"channel":"#random","password":"secretsecret","port":7070,"server":"chat.freenode.net","user":"randobot1337"}}`))
 			})
 		})
 	})
@@ -263,12 +274,26 @@ var _ = Describe("Out", func() {
 			})
 		})
 
-		It("returns correct Params values", func() {
-			request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
-			Expect(error).To(BeNil())
-			Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{
-				"Message": Equal("foo $BUILD_ID"),
-			}))
+		Context("when given a message", func() {
+			It("returns correct Params values", func() {
+				request, error := ParseAndCheckRequest(bytes.NewBufferString(minimalRequestJson()))
+				Expect(error).To(BeNil())
+				Expect(request.Params.MessageFile).To(Equal(""))
+				Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{
+					"Message": Equal("foo $BUILD_ID"),
+				}))
+			})
+		})
+
+		Context("when given a message_file", func() {
+			It("returns correct Params values", func() {
+				request, error := ParseAndCheckRequest(bytes.NewBufferString(messageFileRequestJson()))
+				Expect(error).To(BeNil())
+				Expect(request.Params.Message).To(Equal(""))
+				Expect(request.Params).To(MatchFields(IgnoreExtras, Fields{
+					"MessageFile": Equal("test/one-line-message-file.txt"),
+				}))
+			})
 		})
 
 		Describe("required Params property", func() {
