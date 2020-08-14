@@ -26,7 +26,7 @@ $(ARTIFACTS_DIR)/out: cmd/out/out.go pkg/irc/irc.go
 	go get ./cmd/$(shell basename $@)
 	go build -o $@ ./cmd/$(shell basename $@)
 
-docker: Dockerfile
+docker: Dockerfile artifacts
 	docker build -t flavorjones/irc-notification-resource .
 
 docker-push: docker
