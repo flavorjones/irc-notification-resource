@@ -1,0 +1,43 @@
+{
+  "version": {
+    "ref": "none"
+  },
+  "metadata": [
+    {
+      "name": "resource_version",
+      "value": "${resource_version}"
+    },
+    {
+      "name": "host",
+      "value": "chat.freenode.net:7070"
+    },
+    {
+      "name": "channel",
+      "value": "#random"
+    },
+    {
+      "name": "user",
+      "value": "randobot1337"
+    },
+    {
+      "name": "usetls",
+      "value": "true"
+    },
+    {
+      "name": "join",
+      "value": "false"
+    },
+    {
+      "name": "debug",
+      "value": "true"
+    },
+    {
+      "name": "message",
+      "value": "This is from id-123, a.k.a. name-asdf, see https://ci.example.com/teams/team-name-asdf/pipelines/pipeline-name-asdf/jobs/job-name-asdf/builds/name-asdf"
+    },
+    {
+      "name": "dry_run",
+      "value": "true"
+    }
+  ]
+}

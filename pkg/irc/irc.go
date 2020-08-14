@@ -172,6 +172,8 @@ func sendMultilineMessage(request *Request, conn *irc.Connection, message string
 	messageLines := strings.Split(message, "\n")
 
 	for _, line := range messageLines {
-		conn.Privmsg(request.Source.Channel, line)
+		if len(line) > 0 {
+			conn.Privmsg(request.Source.Channel, line)
+		}
 	}
 }
