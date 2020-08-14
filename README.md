@@ -38,9 +38,12 @@ Connects to the IRC server, authenticates, and sends the given message to the na
 
 #### Parameters
 
-* `message`: The text of the message to be sent.
+Exactly one of the following parameters must be present:
 
-Any Concourse [metadata][] in the `message` will be evaluated prior to sending the tweet.
+* `message`: The text of the notification to be sent.
+* `message_file`: The path to a file containing the text of the notification to be sent.
+
+Any Concourse [metadata][] in the `message` string or in the text contents of `message_file` will be evaluated prior to sending the message. If the notification text contains newlines then it will be split into multiple IRC message sends.
 
 Note also that the pseudo-metadata `BUILD_URL` will expand to:
 
@@ -87,7 +90,7 @@ Pull requests are welcome, as are Github issues opened to discuss bugs or desire
 
 Requires
 
-* `go` >= 1.11
+* `go` >= 1.14
 * `make`
 
 ``` sh
